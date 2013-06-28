@@ -133,7 +133,7 @@ public class MasterKeyTest extends BCTest {
             failBecauseExceptionWasNotThrown(CryptographicException.class);
         } catch (CryptographicException e) {
             assertThat(e.getMessage())
-                    .isEqualTo("incorrect passphrase");
+                    .isEqualTo("Incorrect passphrase");
         }
     }
 }
