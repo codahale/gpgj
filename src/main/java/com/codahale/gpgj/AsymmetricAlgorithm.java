@@ -66,7 +66,7 @@ public enum AsymmetricAlgorithm implements Flag {
 
         @Override
         KeyGenerationParameters getParameters(SecureRandom random) {
-            return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F0, random, 2048, 20);
+            return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 2048, 20);
         }
     },
 

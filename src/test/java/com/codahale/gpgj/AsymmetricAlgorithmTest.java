@@ -45,7 +45,7 @@ public class AsymmetricAlgorithmTest {
         final RSAKeyGenerationParameters spec =
                 (RSAKeyGenerationParameters) AsymmetricAlgorithm.RSA.getParameters(random);
         assertThat(spec.getPublicExponent())
-                .isEqualTo(new BigInteger("3"));
+                .isEqualTo(new BigInteger("65537"));
     }
 
     @Test
