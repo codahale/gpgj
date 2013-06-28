@@ -92,7 +92,7 @@ public enum AsymmetricAlgorithm implements Flag {
      * Elliptic Curve
      *
      * @see <a href="http://www.ietf.org/rfc/rfc4880.txt">Section 13.8, RFC 4880</a>
-     * @deprecated Underspecified in RFC 4880.
+     * @deprecated Underspecified in RFC 4880, not supported in GnuPG.
      */
     @Deprecated
     EC("EC", PublicKeyAlgorithmTags.EC),
@@ -101,7 +101,7 @@ public enum AsymmetricAlgorithm implements Flag {
      * Elliptic Curve Digital Signature Algorithm.
      *
      * @see <a href="http://www.ietf.org/rfc/rfc4880.txt">Section 13.8, RFC 4880</a>
-     * @deprecated Underspecified in RFC 4880.
+     * @deprecated Underspecified in RFC 4880, not supported in GnuPG.
      */
     @Deprecated
     ECDSA("ECDSA", PublicKeyAlgorithmTags.ECDSA),
