@@ -42,7 +42,7 @@ public class UnlockedKeySetTest extends BCTest {
             failBecauseExceptionWasNotThrown(CryptographicException.class);
         } catch (CryptographicException e) {
             assertThat(e.getMessage())
-                    .isEqualTo("incorrect passphrase");
+                    .isEqualTo("Incorrect passphrase");
         }
 
         assertThat(newKeySet.unlock("yes".toCharArray()))
