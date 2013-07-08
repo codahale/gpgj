@@ -62,8 +62,22 @@ public class MessageReader {
      *                                pointless.
      */
     public byte[] read(byte[] encrypted) throws CryptographicException {
+        return read(new ByteArrayInputStream(encrypted));
+    }
+
+    /**
+     * Decrypts the message and verifies its signature and integrity packet.
+     *
+     * @param encrypted the encrypted message body
+     * @return the decrypted message body
+     * @throws CryptographicException if any error occurs while processing the message. This should
+     *                                be taken as an indicator that the message has been tampered
+     *                                with or is invalid, and that retrying the operation would be
+     *                                pointless.
+     */
+    public byte[] read(InputStream encrypted) throws CryptographicException {
         try {
-            final PGPPublicKeyEncryptedData encryptedData = getEncryptedData(new ByteArrayInputStream(encrypted));
+            final PGPPublicKeyEncryptedData encryptedData = getEncryptedData(encrypted);
             final InputStream decryptedData = encryptedData.getDataStream(new BcPublicKeyDataDecryptorFactory(recipient.getUnlockedSubKey().getPrivateKey()));
             final InputStream decompressedData = getCompressedData(decryptedData);
 
