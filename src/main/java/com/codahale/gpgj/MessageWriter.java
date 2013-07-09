@@ -69,8 +69,6 @@ import java.util.Date;
  *
  * @see <a href="http://eprint.iacr.org/2005/033.pdf">An Attack on CFB Mode Encryption As Used By OpenPGP</a>
  * @see <a href="http://www.cs.umd.edu/~jkatz/papers/pgp-attack.pdf">Implementation of Chosen-Ciphertext Attacks against PGP and GnuPG</a>
- * @see AsymmetricAlgorithm#ENCRYPTION_DEFAULT
- * @see AsymmetricAlgorithm#SIGNING_DEFAULT
  * @see SymmetricAlgorithm#DEFAULT
  * @see HashAlgorithm#DEFAULT
  * @see CompressionAlgorithm#DEFAULT

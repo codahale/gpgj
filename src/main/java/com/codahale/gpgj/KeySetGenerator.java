@@ -2,7 +2,6 @@ package com.codahale.gpgj;
 
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPKeyRingGenerator;
 import org.bouncycastle.openpgp.PGPSignatureSubpacketGenerator;
@@ -25,36 +24,13 @@ import java.util.concurrent.Future;
 
 /**
  * A multithreaded generator for {@link KeySet}s.
- * <p/>
- * Generates master keys using {@link AsymmetricAlgorithm#ENCRYPTION_DEFAULT},
- * and subkeys using {@link AsymmetricAlgorithm#SIGNING_DEFAULT}.
  */
 public class KeySetGenerator {
-    private static class GeneratorTask implements Callable<AsymmetricCipherKeyPair> {
-        private final AsymmetricAlgorithm algorithm;
-        private final SecureRandom random;
-        private final KeyStrength strength;
-
-        public GeneratorTask(AsymmetricAlgorithm algorithm, SecureRandom random, KeyStrength strength) {
-            this.algorithm = algorithm;
-            this.random = random;
-            this.strength = strength;
-        }
-
-        @Override
-        public AsymmetricCipherKeyPair call() throws Exception {
-            final AsymmetricCipherKeyPairGenerator generator = algorithm.getGenerator();
-            generator.init(algorithm.getParameters(random, strength));
-            return generator.generateKeyPair();
-        }
-    }
-
     private final SecureRandom random;
     private final ExecutorService executor;
-    private final AsymmetricAlgorithm signingAlgorithm;
-    private final AsymmetricAlgorithm encryptingAlgorithm;
-    private final KeyStrength strength;
-    private final SymmetricAlgorithm symmetricAlgorithm;
+    private final MasterKeyGenerator masterKeyGenerator;
+    private final SubKeyGenerator subKeyGenerator;
+    private final SymmetricAlgorithm keyEncryptionAlgorithm;
 
     /**
      * Creates a new {@link KeySetGenerator}.
@@ -63,8 +39,8 @@ public class KeySetGenerator {
      * @param executor a set of worker threads
      */
     public KeySetGenerator(SecureRandom random, ExecutorService executor) {
-        this(random, executor, AsymmetricAlgorithm.SIGNING_DEFAULT,
-             AsymmetricAlgorithm.ENCRYPTION_DEFAULT, KeyStrength.MEDIUM, SymmetricAlgorithm.DEFAULT);
+        this(random, executor, RsaKeyGenerator.rsa2048(), RsaKeyGenerator.rsa2048(),
+             SymmetricAlgorithm.AES_256);
     }
 
     /**
@@ -72,23 +48,20 @@ public class KeySetGenerator {
      *
      * @param random              a secure random number generator
      * @param executor            a set of worker threads
-     * @param signingAlgorithm    the algorithm to use for signatures
-     * @param encryptingAlgorithm the algorithm to use for encryption
-     * @param strength            the strength of keys to generate
-     * @param symmetricAlgorithm  the symmetric algorithm to use
+     * @param masterKeyGenerator  the generator to use for master keys
+     * @param subKeyGenerator the generator to use for sub keys
+     * @param keyEncryptionAlgorithm  the symmetric algorithm to use
      */
     public KeySetGenerator(SecureRandom random,
                            ExecutorService executor,
-                           AsymmetricAlgorithm signingAlgorithm,
-                           AsymmetricAlgorithm encryptingAlgorithm,
-                           KeyStrength strength,
-                           SymmetricAlgorithm symmetricAlgorithm) {
+                           MasterKeyGenerator masterKeyGenerator,
+                           SubKeyGenerator subKeyGenerator,
+                           SymmetricAlgorithm keyEncryptionAlgorithm) {
         this.random = random;
         this.executor = executor;
-        this.signingAlgorithm = signingAlgorithm;
-        this.encryptingAlgorithm = encryptingAlgorithm;
-        this.strength = strength;
-        this.symmetricAlgorithm = symmetricAlgorithm;
+        this.masterKeyGenerator = masterKeyGenerator;
+        this.subKeyGenerator = subKeyGenerator;
+        this.keyEncryptionAlgorithm = keyEncryptionAlgorithm;
     }
 
     /**
@@ -102,12 +75,25 @@ public class KeySetGenerator {
     public KeySet generate(String userId, char[] passphrase) throws CryptographicException {
         try {
             final Date timestamp = new Date();
-            final Future<AsymmetricCipherKeyPair> masterKeyPair = generateKeyPair(signingAlgorithm);
-            final Future<AsymmetricCipherKeyPair> subKeyPair = generateKeyPair(encryptingAlgorithm);
+            final Future<AsymmetricCipherKeyPair> masterKeyPair =
+                    executor.submit(new Callable<AsymmetricCipherKeyPair>() {
+                        @Override
+                        public AsymmetricCipherKeyPair call() throws Exception {
+                            return masterKeyGenerator.generate(random);
+                        }
+                    });
+            final Future<AsymmetricCipherKeyPair> subKeyPair =
+                    executor.submit(new Callable<AsymmetricCipherKeyPair>() {
+                        @Override
+                        public AsymmetricCipherKeyPair call() throws Exception {
+                            return subKeyGenerator.generate(random);
+                        }
+                    });
 
-            final BcPGPKeyPair masterPGPKeyPair = new BcPGPKeyPair(signingAlgorithm.value(),
-                                                                   masterKeyPair.get(),
-                                                                   timestamp);
+            final BcPGPKeyPair masterPGPKeyPair =
+                    new BcPGPKeyPair(masterKeyGenerator.getAlgorithm().value(),
+                                     masterKeyPair.get(),
+                                     timestamp);
             final PGPDigestCalculator calculator =
                     new JcaPGPDigestCalculatorProviderBuilder().build().get(HashAlgorithmTags.SHA1);
 
@@ -117,7 +103,7 @@ public class KeySetGenerator {
                             .setSecureRandom(random);
 
             final PBESecretKeyEncryptor encryptor =
-                    new JcePBESecretKeyEncryptorBuilder(symmetricAlgorithm.value())
+                    new JcePBESecretKeyEncryptorBuilder(keyEncryptionAlgorithm.value())
                             .setSecureRandom(random)
                             .build(passphrase);
 
@@ -131,9 +117,10 @@ public class KeySetGenerator {
                                             signer,
                                             encryptor);
 
-            final BcPGPKeyPair subPGPKeyPair = new BcPGPKeyPair(encryptingAlgorithm.value(),
-                                                                subKeyPair.get(),
-                                                                timestamp);
+            final BcPGPKeyPair subPGPKeyPair =
+                    new BcPGPKeyPair(subKeyGenerator.getAlgorithm().value(),
+                                     subKeyPair.get(),
+                                     timestamp);
 
             generator.addSubKey(subPGPKeyPair, generateSubKeySettings(), null); // likewise, use hashed packets
 
@@ -158,9 +145,5 @@ public class KeySetGenerator {
                                                                                          CompressionAlgorithm.ZLIB,
                                                                                          CompressionAlgorithm.ZIP)));
         return settings.generate();
-    }
-
-    private Future<AsymmetricCipherKeyPair> generateKeyPair(final AsymmetricAlgorithm algorithm) {
-        return executor.submit(new GeneratorTask(algorithm, random, strength));
     }
 }

@@ -35,7 +35,7 @@ public class KeySetGeneratorTest extends BCTest {
     @Test
     public void hasAMasterKeyOfTheDefaultType() throws Exception {
         assertThat(KEYSET.getMasterKey().getAlgorithm())
-                .isEqualTo(AsymmetricAlgorithm.SIGNING_DEFAULT);
+                .isEqualTo(AsymmetricAlgorithm.RSA);
     }
 
     @Test
@@ -91,7 +91,7 @@ public class KeySetGeneratorTest extends BCTest {
     @Test
     public void hasASubKeyOfTheDefaultType() throws Exception {
         assertThat(KEYSET.getSubKey().getAlgorithm())
-                .isEqualTo(AsymmetricAlgorithm.ENCRYPTION_DEFAULT);
+                .isEqualTo(AsymmetricAlgorithm.RSA);
     }
 
     @Test

@@ -1,17 +1,6 @@
 package com.codahale.gpgj;
 
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
-import org.bouncycastle.crypto.AsymmetricCipherKeyPairGenerator;
-import org.bouncycastle.crypto.KeyGenerationParameters;
-import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
-import org.bouncycastle.crypto.generators.ElGamalKeyPairGenerator;
-import org.bouncycastle.crypto.generators.RSAKeyPairGenerator;
-import org.bouncycastle.crypto.params.DSAKeyGenerationParameters;
-import org.bouncycastle.crypto.params.ElGamalKeyGenerationParameters;
-import org.bouncycastle.crypto.params.RSAKeyGenerationParameters;
-
-import java.security.SecureRandom;
-import java.security.spec.RSAKeyGenParameterSpec;
 
 /**
  * An asymmetric encryption or signing algorithm for OpenPGP messages.
@@ -24,75 +13,21 @@ public enum AsymmetricAlgorithm implements Flag {
      *
      * @see <a href="http://en.wikipedia.org/wiki/ElGamal_encryption">Wikipedia</a>
      */
-    ELGAMAL("Elgamal", PublicKeyAlgorithmTags.ELGAMAL_ENCRYPT) {
-        @Override
-        AsymmetricCipherKeyPairGenerator getGenerator() {
-            return new ElGamalKeyPairGenerator();
-        }
-
-        @Override
-        KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
-            switch (strength) {
-                case LOW:
-                    return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_1024);
-                case MEDIUM:
-                    return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_2048);
-                case HIGH:
-                default:
-                    return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_4096);
-            }
-        }
-    },
+    ELGAMAL("Elgamal", PublicKeyAlgorithmTags.ELGAMAL_ENCRYPT),
 
     /**
      * DSA (Digital Signature Algorithm)
      *
      * @see <a href="http://en.wikipedia.org/wiki/Digital_Signature_Algorithm">Wikipedia</a>
      */
-    DSA("DSA", PublicKeyAlgorithmTags.DSA) {
-        @Override
-        AsymmetricCipherKeyPairGenerator getGenerator() {
-            return new DSAKeyPairGenerator();
-        }
-
-        @Override
-        KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
-            switch (strength) {
-                case LOW:
-                    return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_1024);
-                case MEDIUM:
-                    return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_2048);
-                case HIGH:
-                default:
-                    return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_3072);
-            }
-        }
-    },
+    DSA("DSA", PublicKeyAlgorithmTags.DSA),
 
     /**
      * RSA (Encrypt or Sign)
      *
      * @see <a href="http://en.wikipedia.org/wiki/RSA">Wikipedia</a>
      */
-    RSA("RSA", PublicKeyAlgorithmTags.RSA_GENERAL) {
-        @Override
-        AsymmetricCipherKeyPairGenerator getGenerator() {
-            return new RSAKeyPairGenerator();
-        }
-
-        @Override
-        KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
-            switch (strength) {
-                case LOW:
-                    return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 1024, 12);
-                case MEDIUM:
-                    return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 2048, 12);
-                case HIGH:
-                default:
-                    return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 4096, 12);
-            }
-        }
-    },
+    RSA("RSA", PublicKeyAlgorithmTags.RSA_GENERAL),
 
     /**
      * RSA Encrypt-Only
@@ -149,18 +84,6 @@ public enum AsymmetricAlgorithm implements Flag {
     @Deprecated
     DH("DH", PublicKeyAlgorithmTags.DIFFIE_HELLMAN);
 
-    /**
-     * The default asymmetric encryption algorithm, to be used when generating
-     * new subkeys.
-     */
-    public static final AsymmetricAlgorithm ENCRYPTION_DEFAULT = RSA;
-
-    /**
-     * The default digital signature algorithm, to be used when generating new
-     * master keys.
-     */
-    public static final AsymmetricAlgorithm SIGNING_DEFAULT = RSA;
-
     private final String name;
     private final int value;
 
@@ -174,14 +97,6 @@ public enum AsymmetricAlgorithm implements Flag {
      */
     public String getName() {
         return name;
-    }
-
-    AsymmetricCipherKeyPairGenerator getGenerator() {
-        throw new UnsupportedOperationException(this + " keys cannot be generated");
-    }
-
-    KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
-        throw new UnsupportedOperationException(this + " keys cannot be generated");
     }
 
     /**
