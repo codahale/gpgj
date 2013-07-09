@@ -2,8 +2,9 @@ package com.codahale.gpgj;
 
 import org.bouncycastle.bcpg.SymmetricKeyAlgorithmTags;
 
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A symmetric encryption algorithm for OpenPGP messages.
@@ -99,8 +100,8 @@ public enum SymmetricAlgorithm implements Flag {
     /**
      * A set of symmetric algorithms which are acceptable for use in new systems.
      */
-    public static final Set<SymmetricAlgorithm> ACCEPTABLE_ALGORITHMS =
-            EnumSet.of(AES_128, AES_192, AES_256);
+    public static final List<SymmetricAlgorithm> ACCEPTABLE_ALGORITHMS =
+            Collections.unmodifiableList(Arrays.asList(AES_256, AES_192, AES_128));
 
     private final String name;
     private final int value;

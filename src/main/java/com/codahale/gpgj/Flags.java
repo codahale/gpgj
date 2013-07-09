@@ -8,7 +8,7 @@ import java.util.*;
 class Flags {
     private Flags() { /* singleton */ }
 
-    static int[] toIntArray(Collection<? extends Flag> flags) {
+    static int[] toIntArray(List<? extends Flag> flags) {
         final int[] values = new int[flags.size()];
         int i = 0;
         for (Flag integerEquiv : flags) {

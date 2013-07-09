@@ -2,6 +2,10 @@ package com.codahale.gpgj;
 
 import org.bouncycastle.bcpg.CompressionAlgorithmTags;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A compression algorithm for OpenPGP messages.
  *
@@ -42,6 +46,12 @@ public enum CompressionAlgorithm implements Flag {
      * The default compression algorithm to use.
      */
     public static final CompressionAlgorithm DEFAULT = ZLIB;
+
+    /**
+     * A set of compression algorithms which are acceptable for use in new systems.
+     */
+    public static final List<CompressionAlgorithm> ACCEPTABLE_ALGORITHMS =
+            Collections.unmodifiableList(Arrays.asList(ZLIB, BZIP2, ZIP));
 
     private final String name;
     private final int value;

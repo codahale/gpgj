@@ -2,8 +2,9 @@ package com.codahale.gpgj;
 
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 
-import java.util.EnumSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A hash algorithm for OpenPGP messages.
@@ -107,8 +108,8 @@ public enum HashAlgorithm implements Flag {
      * A set of hash algorithms which are acceptable for use in new systems.
      */
     @SuppressWarnings("deprecation")
-    public static final Set<HashAlgorithm> ACCEPTABLE_ALGORITHMS =
-            EnumSet.of(SHA_224, SHA_256, SHA_384, SHA_512, SHA_1);
+    public static final List<HashAlgorithm> ACCEPTABLE_ALGORITHMS =
+            Collections.unmodifiableList(Arrays.asList(SHA_512, SHA_256, SHA_384, SHA_224, SHA_1));
 
     private final int value;
     private final String name;

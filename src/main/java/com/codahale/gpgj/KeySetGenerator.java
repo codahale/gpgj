@@ -15,7 +15,6 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPDigestCalculatorProviderBu
 import org.bouncycastle.openpgp.operator.jcajce.JcePBESecretKeyEncryptorBuilder;
 
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -40,17 +39,17 @@ public class KeySetGenerator {
      */
     public KeySetGenerator(SecureRandom random, ExecutorService executor) {
         this(random, executor, RsaKeyGenerator.rsa2048(), RsaKeyGenerator.rsa2048(),
-             SymmetricAlgorithm.AES_256);
+             SymmetricAlgorithm.DEFAULT);
     }
 
     /**
      * Creates a new {@link KeySetGenerator}.
      *
-     * @param random              a secure random number generator
-     * @param executor            a set of worker threads
-     * @param masterKeyGenerator  the generator to use for master keys
-     * @param subKeyGenerator the generator to use for sub keys
-     * @param keyEncryptionAlgorithm  the symmetric algorithm to use
+     * @param random                 a secure random number generator
+     * @param executor               a set of worker threads
+     * @param masterKeyGenerator     the generator to use for master keys
+     * @param subKeyGenerator        the generator to use for sub keys
+     * @param keyEncryptionAlgorithm the symmetric algorithm to use to encrypt the private keys
      */
     public KeySetGenerator(SecureRandom random,
                            ExecutorService executor,
@@ -122,7 +121,8 @@ public class KeySetGenerator {
                                      subKeyPair.get(),
                                      timestamp);
 
-            generator.addSubKey(subPGPKeyPair, generateSubKeySettings(), null); // likewise, use hashed packets
+            generator
+                    .addSubKey(subPGPKeyPair, generateSubKeySettings(), null); // likewise, use hashed packets
 
             return new KeySet(generator.generateSecretKeyRing());
         } catch (PGPException | InterruptedException | ExecutionException e) {
@@ -141,9 +141,7 @@ public class KeySetGenerator {
         settings.setKeyFlags(false, Flags.toBitmask(KeyFlag.MASTER_KEY_DEFAULTS));
         settings.setPreferredSymmetricAlgorithms(false, Flags.toIntArray(SymmetricAlgorithm.ACCEPTABLE_ALGORITHMS));
         settings.setPreferredHashAlgorithms(false, Flags.toIntArray(HashAlgorithm.ACCEPTABLE_ALGORITHMS));
-        settings.setPreferredCompressionAlgorithms(false, Flags.toIntArray(Arrays.asList(CompressionAlgorithm.BZIP2,
-                                                                                         CompressionAlgorithm.ZLIB,
-                                                                                         CompressionAlgorithm.ZIP)));
+        settings.setPreferredCompressionAlgorithms(false, Flags.toIntArray(CompressionAlgorithm.ACCEPTABLE_ALGORITHMS));
         return settings.generate();
     }
 }
