@@ -16,19 +16,13 @@ import java.security.SecureRandom;
  */
 @Deprecated
 abstract class AbstractEcKeyGenerator {
-    protected static final ECDomainParameters P256;
-    protected static final ECDomainParameters P384;
-    protected static final ECDomainParameters P521;
+    protected static final ECDomainParameters P256 = convert(NISTNamedCurves.getByName("P-256"));
+    protected static final ECDomainParameters P384 = convert(NISTNamedCurves.getByName("P-384"));
+    protected static final ECDomainParameters P521 = convert(NISTNamedCurves.getByName("P-521"));
 
-    static {
-        final X9ECParameters p256 = NISTNamedCurves.getByName("P-256");
-        P256 = new ECDomainParameters(p256.getCurve(), p256.getG(), p256.getN(), p256.getH(), p256.getSeed());
-
-        final X9ECParameters p384 = NISTNamedCurves.getByName("P-384");
-        P384 = new ECDomainParameters(p384.getCurve(), p384.getG(), p384.getN(), p384.getH(), p384.getSeed());
-
-        final X9ECParameters p521 = NISTNamedCurves.getByName("P-521");
-        P521 = new ECDomainParameters(p521.getCurve(), p521.getG(), p521.getN(), p521.getH(), p521.getSeed());
+    private static ECDomainParameters convert(X9ECParameters params) {
+        return new ECDomainParameters(params.getCurve(), params.getG(), params.getN(),
+                                      params.getH(), params.getSeed());
     }
 
     private final ECDomainParameters parameters;
