@@ -83,7 +83,7 @@ public class AsymmetricAlgorithmTest {
         final ElGamalKeyGenerationParameters spec =
                 (ElGamalKeyGenerationParameters) AsymmetricAlgorithm.ELGAMAL.getParameters(random);
         assertThat(spec.getParameters())
-                .isInstanceOf(FastElgamalParameters.class);
+                .isEqualTo(FastElgamalParameters.ELGAMAL_2048);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class AsymmetricAlgorithmTest {
         final DSAKeyGenerationParameters spec =
                 (DSAKeyGenerationParameters) AsymmetricAlgorithm.DSA.getParameters(random);
         assertThat(spec.getParameters())
-                .isInstanceOf(FastDSAParameters.class);
+                .isEqualTo(FastDSAParameters.DSA_1024);
     }
 
     @Test

@@ -32,7 +32,7 @@ public enum AsymmetricAlgorithm implements Flag {
 
         @Override
         KeyGenerationParameters getParameters(SecureRandom random) {
-            return new ElGamalKeyGenerationParameters(random, new FastElgamalParameters());
+            return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_2048);
         }
     },
 
@@ -49,7 +49,7 @@ public enum AsymmetricAlgorithm implements Flag {
 
         @Override
         KeyGenerationParameters getParameters(SecureRandom random) {
-            return new DSAKeyGenerationParameters(random, new FastDSAParameters());
+            return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_1024);
         }
     },
 
