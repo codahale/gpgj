@@ -11,7 +11,11 @@ import java.security.SecureRandom;
 
 /**
  * An abstract base class for ECC key generators.
+ * <p/>
+ * Only supports NIST P-256, P-384, and P-521 keys, as per
+ * <a href="http://www.ietf.org/rfc/rfc6637.txt">RFC 6637</a>.
  *
+ * @see <a href="http://www.ietf.org/rfc/rfc6637.txt">RFC 6637</a>
  * @deprecated Not supported in GnuPG or BouncyCastle yet.
  */
 @Deprecated
