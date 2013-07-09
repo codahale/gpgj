@@ -48,19 +48,21 @@ public enum AsymmetricAlgorithm implements Flag {
     RSA_S("RSA(s)", PublicKeyAlgorithmTags.RSA_SIGN),
 
     /**
-     * Elliptic Curve
+     * Elliptic Curve Diffie-Hellman
      *
      * @see <a href="http://www.ietf.org/rfc/rfc4880.txt">Section 13.8, RFC 4880</a>
-     * @deprecated Underspecified in RFC 4880, not supported in GnuPG.
+     * @see <a href="http://www.ietf.org/rfc/rfc6637.txt">RFC 6637</a>
+     * @deprecated Not supported in GnuPG or BouncyCastle yet.
      */
     @Deprecated
-    EC("EC", PublicKeyAlgorithmTags.EC),
+    ECDH("ECDH", PublicKeyAlgorithmTags.EC),
 
     /**
-     * Elliptic Curve Digital Signature Algorithm.
+     * Elliptic Curve Digital Signature Algorithm
      *
      * @see <a href="http://www.ietf.org/rfc/rfc4880.txt">Section 13.8, RFC 4880</a>
-     * @deprecated Underspecified in RFC 4880, not supported in GnuPG.
+     * @see <a href="http://www.ietf.org/rfc/rfc6637.txt">RFC 6637</a>
+     * @deprecated Not supported in GnuPG or BouncyCastle yet.
      */
     @Deprecated
     ECDSA("ECDSA", PublicKeyAlgorithmTags.ECDSA),

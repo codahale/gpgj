@@ -70,15 +70,15 @@ public class AsymmetricAlgorithmTest {
     }
 
     @Test
-    public void ecHasTheSameValueAsTheBCTag() throws Exception {
-        assertThat(AsymmetricAlgorithm.EC.value())
+    public void ecdhHasTheSameValueAsTheBCTag() throws Exception {
+        assertThat(AsymmetricAlgorithm.ECDH.value())
                 .isEqualTo(PublicKeyAlgorithmTags.EC);
     }
 
     @Test
-    public void ecIsNamedEC() throws Exception {
-        assertThat(AsymmetricAlgorithm.EC.getName())
-                .isEqualTo("EC");
+    public void ecdhIsNamedECDH() throws Exception {
+        assertThat(AsymmetricAlgorithm.ECDH.getName())
+                .isEqualTo("ECDH");
     }
 
     @Test
