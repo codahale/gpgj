@@ -54,4 +54,17 @@ public class ElgamalKeyGeneratorTest {
         assertThat(privateKeys.getParameters().getP().toByteArray().length)
                 .isEqualTo(513);
     }
+
+    @Test
+    public void generates8192bitKeys() throws Exception {
+        final AsymmetricCipherKeyPair pair = ElgamalKeyGenerator.elgamal8192().generate(random);
+
+        assertThat(pair.getPrivate())
+                .isInstanceOf(ElGamalPrivateKeyParameters.class);
+
+        final ElGamalPrivateKeyParameters privateKeys = (ElGamalPrivateKeyParameters) pair
+                .getPrivate();
+        assertThat(privateKeys.getParameters().getP().toByteArray().length)
+                .isEqualTo(1025);
+    }
 }
