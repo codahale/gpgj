@@ -34,7 +34,7 @@ public class AsymmetricAlgorithmTest {
     public void rsaHasADefaultSizeOf2048Bits() throws Exception {
         final SecureRandom random = mock(SecureRandom.class);
         final RSAKeyGenerationParameters spec =
-                (RSAKeyGenerationParameters) AsymmetricAlgorithm.RSA.getParameters(random);
+                (RSAKeyGenerationParameters) AsymmetricAlgorithm.RSA.getParameters(random, KeyStrength.MEDIUM);
         assertThat(spec.getStrength())
                 .isEqualTo(2048);
     }
@@ -43,7 +43,7 @@ public class AsymmetricAlgorithmTest {
     public void rsaUsesASmallExponent() throws Exception {
         final SecureRandom random = mock(SecureRandom.class);
         final RSAKeyGenerationParameters spec =
-                (RSAKeyGenerationParameters) AsymmetricAlgorithm.RSA.getParameters(random);
+                (RSAKeyGenerationParameters) AsymmetricAlgorithm.RSA.getParameters(random, KeyStrength.MEDIUM);
         assertThat(spec.getPublicExponent())
                 .isEqualTo(new BigInteger("65537"));
     }
@@ -52,7 +52,7 @@ public class AsymmetricAlgorithmTest {
     public void rsaReusesThePRNG() throws Exception {
         final SecureRandom random = mock(SecureRandom.class);
         final RSAKeyGenerationParameters spec =
-                (RSAKeyGenerationParameters) AsymmetricAlgorithm.RSA.getParameters(random);
+                (RSAKeyGenerationParameters) AsymmetricAlgorithm.RSA.getParameters(random, KeyStrength.MEDIUM);
         assertThat(spec.getRandom())
                 .isEqualTo(random);
     }
@@ -81,7 +81,7 @@ public class AsymmetricAlgorithmTest {
     public void elgamalUsesFastParameters() throws Exception {
         final SecureRandom random = mock(SecureRandom.class);
         final ElGamalKeyGenerationParameters spec =
-                (ElGamalKeyGenerationParameters) AsymmetricAlgorithm.ELGAMAL.getParameters(random);
+                (ElGamalKeyGenerationParameters) AsymmetricAlgorithm.ELGAMAL.getParameters(random, KeyStrength.MEDIUM);
         assertThat(spec.getParameters())
                 .isEqualTo(FastElgamalParameters.ELGAMAL_2048);
     }
@@ -90,7 +90,7 @@ public class AsymmetricAlgorithmTest {
     public void elgamalReusesThePRNG() throws Exception {
         final SecureRandom random = mock(SecureRandom.class);
         final ElGamalKeyGenerationParameters spec =
-                (ElGamalKeyGenerationParameters) AsymmetricAlgorithm.ELGAMAL.getParameters(random);
+                (ElGamalKeyGenerationParameters) AsymmetricAlgorithm.ELGAMAL.getParameters(random, KeyStrength.MEDIUM);
         assertThat(spec.getRandom())
                 .isEqualTo(random);
     }
@@ -117,7 +117,7 @@ public class AsymmetricAlgorithmTest {
     public void dsaUsesFastParameters() throws Exception {
         final SecureRandom random = mock(SecureRandom.class);
         final DSAKeyGenerationParameters spec =
-                (DSAKeyGenerationParameters) AsymmetricAlgorithm.DSA.getParameters(random);
+                (DSAKeyGenerationParameters) AsymmetricAlgorithm.DSA.getParameters(random, KeyStrength.MEDIUM);
         assertThat(spec.getParameters())
                 .isEqualTo(FastDSAParameters.DSA_1024);
     }
@@ -126,7 +126,7 @@ public class AsymmetricAlgorithmTest {
     public void dsaReusesThePRNG() throws Exception {
         final SecureRandom random = mock(SecureRandom.class);
         final DSAKeyGenerationParameters spec =
-                (DSAKeyGenerationParameters) AsymmetricAlgorithm.DSA.getParameters(random);
+                (DSAKeyGenerationParameters) AsymmetricAlgorithm.DSA.getParameters(random, KeyStrength.MEDIUM);
         assertThat(spec.getRandom())
                 .isEqualTo(random);
     }

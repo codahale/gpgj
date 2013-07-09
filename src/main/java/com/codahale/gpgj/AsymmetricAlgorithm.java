@@ -31,8 +31,16 @@ public enum AsymmetricAlgorithm implements Flag {
         }
 
         @Override
-        KeyGenerationParameters getParameters(SecureRandom random) {
-            return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_2048);
+        KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
+            switch (strength) {
+                case LOW:
+                    return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_1024);
+                case MEDIUM:
+                    return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_2048);
+                case HIGH:
+                default:
+                    return new ElGamalKeyGenerationParameters(random, FastElgamalParameters.ELGAMAL_4096);
+            }
         }
     },
 
@@ -48,8 +56,16 @@ public enum AsymmetricAlgorithm implements Flag {
         }
 
         @Override
-        KeyGenerationParameters getParameters(SecureRandom random) {
-            return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_1024);
+        KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
+            switch (strength) {
+                case LOW:
+                    return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_1024);
+                case MEDIUM:
+                    return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_2048);
+                case HIGH:
+                default:
+                    return new DSAKeyGenerationParameters(random, FastDSAParameters.DSA_3072);
+            }
         }
     },
 
@@ -65,8 +81,16 @@ public enum AsymmetricAlgorithm implements Flag {
         }
 
         @Override
-        KeyGenerationParameters getParameters(SecureRandom random) {
-            return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 2048, 12);
+        KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
+            switch (strength) {
+                case LOW:
+                    return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 1024, 12);
+                case MEDIUM:
+                    return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 2048, 12);
+                case HIGH:
+                default:
+                    return new RSAKeyGenerationParameters(RSAKeyGenParameterSpec.F4, random, 4096, 12);
+            }
         }
     },
 
@@ -156,7 +180,7 @@ public enum AsymmetricAlgorithm implements Flag {
         throw new UnsupportedOperationException(this + " keys cannot be generated");
     }
 
-    KeyGenerationParameters getParameters(SecureRandom random) {
+    KeyGenerationParameters getParameters(SecureRandom random, KeyStrength strength) {
         throw new UnsupportedOperationException(this + " keys cannot be generated");
     }
 

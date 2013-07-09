@@ -33,16 +33,18 @@ public class KeySetGenerator {
     private static class GeneratorTask implements Callable<AsymmetricCipherKeyPair> {
         private final AsymmetricAlgorithm algorithm;
         private final SecureRandom random;
+        private final KeyStrength strength;
 
-        public GeneratorTask(AsymmetricAlgorithm algorithm, SecureRandom random) {
+        public GeneratorTask(AsymmetricAlgorithm algorithm, SecureRandom random, KeyStrength strength) {
             this.algorithm = algorithm;
             this.random = random;
+            this.strength = strength;
         }
 
         @Override
         public AsymmetricCipherKeyPair call() throws Exception {
             final AsymmetricCipherKeyPairGenerator generator = algorithm.getGenerator();
-            generator.init(algorithm.getParameters(random));
+            generator.init(algorithm.getParameters(random, strength));
             return generator.generateKeyPair();
         }
     }
@@ -51,6 +53,7 @@ public class KeySetGenerator {
     private final ExecutorService executor;
     private final AsymmetricAlgorithm signingAlgorithm;
     private final AsymmetricAlgorithm encryptingAlgorithm;
+    private final KeyStrength strength;
     private final SymmetricAlgorithm symmetricAlgorithm;
 
     /**
@@ -61,7 +64,7 @@ public class KeySetGenerator {
      */
     public KeySetGenerator(SecureRandom random, ExecutorService executor) {
         this(random, executor, AsymmetricAlgorithm.SIGNING_DEFAULT,
-             AsymmetricAlgorithm.ENCRYPTION_DEFAULT, SymmetricAlgorithm.DEFAULT);
+             AsymmetricAlgorithm.ENCRYPTION_DEFAULT, KeyStrength.MEDIUM, SymmetricAlgorithm.DEFAULT);
     }
 
     /**
@@ -71,17 +74,20 @@ public class KeySetGenerator {
      * @param executor            a set of worker threads
      * @param signingAlgorithm    the algorithm to use for signatures
      * @param encryptingAlgorithm the algorithm to use for encryption
+     * @param strength            the strength of keys to generate
      * @param symmetricAlgorithm  the symmetric algorithm to use
      */
     public KeySetGenerator(SecureRandom random,
                            ExecutorService executor,
                            AsymmetricAlgorithm signingAlgorithm,
                            AsymmetricAlgorithm encryptingAlgorithm,
+                           KeyStrength strength,
                            SymmetricAlgorithm symmetricAlgorithm) {
         this.random = random;
         this.executor = executor;
         this.signingAlgorithm = signingAlgorithm;
         this.encryptingAlgorithm = encryptingAlgorithm;
+        this.strength = strength;
         this.symmetricAlgorithm = symmetricAlgorithm;
     }
 
@@ -155,6 +161,6 @@ public class KeySetGenerator {
     }
 
     private Future<AsymmetricCipherKeyPair> generateKeyPair(final AsymmetricAlgorithm algorithm) {
-        return executor.submit(new GeneratorTask(algorithm, random));
+        return executor.submit(new GeneratorTask(algorithm, random, strength));
     }
 }
