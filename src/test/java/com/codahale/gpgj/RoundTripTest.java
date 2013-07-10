@@ -28,7 +28,7 @@ public class RoundTripTest {
 
     @DataPoints
     public static SubKeyGenerator[] SUB_GENERATORS = {
-            ElgamalKeyGenerator.elgamal1024(),
+            ElgamalKeyGenerator.elgamal1536(),
             ElgamalKeyGenerator.elgamal2048(),
             ElgamalKeyGenerator.elgamal4096(),
             RsaKeyGenerator.rsa1024(),
