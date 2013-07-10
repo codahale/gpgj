@@ -4,9 +4,15 @@ import org.bouncycastle.crypto.AsymmetricCipherKeyPair;
 import org.bouncycastle.crypto.generators.DSAKeyPairGenerator;
 import org.bouncycastle.crypto.params.DSAKeyGenerationParameters;
 import org.bouncycastle.crypto.params.DSAParameters;
+import org.bouncycastle.jcajce.provider.asymmetric.dsa.AlgorithmParameterGeneratorSpi;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.math.BigInteger;
+import java.security.AlgorithmParameters;
 import java.security.SecureRandom;
+import java.security.Security;
+import java.security.spec.DSAParameterSpec;
+import java.util.Arrays;
 
 /**
  * Generates DSA master keys.
@@ -14,77 +20,142 @@ import java.security.SecureRandom;
  * @see <a href="http://en.wikipedia.org/wiki/Digital_Signature_Algorithm">Wikipedia</a>
  */
 public class DsaKeyGenerator implements MasterKeyGenerator {
-    /*
-     * Generated with `openssl dsaparam -text 1024`.
+    private static class DsaGeneratorSpi extends AlgorithmParameterGeneratorSpi {
+        @Override
+        public void engineInit(int strength, SecureRandom random) {
+            super.engineInit(strength, random);
+        }
+
+        @Override
+        public AlgorithmParameters engineGenerateParameters() {
+            return super.engineGenerateParameters();
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        // re-use the JCE SPI for BC's DSA param generation
+        Security.addProvider(new BouncyCastleProvider());
+        final SecureRandom random = new SecureRandom();
+        final DsaGeneratorSpi spi = new DsaGeneratorSpi();
+        for (int size : Arrays.asList(1024, 2048, 3072)) {
+            System.out.printf("Generating %d-bit parameters...%n", size);
+            spi.engineInit(size, random);
+            final AlgorithmParameters params = spi.engineGenerateParameters();
+            final DSAParameterSpec dsaParams = params.getParameterSpec(DSAParameterSpec.class);
+            System.out.printf("P = %n%s%n%n", format(dsaParams.getP()));
+            System.out.printf("Q = %n%s%n%n", format(dsaParams.getQ()));
+            System.out.printf("G = %n%s%n%n", format(dsaParams.getG()));
+        }
+    }
+
+    private static String format(BigInteger n) {
+        final String s = n.toString(16).toUpperCase();
+        final StringBuilder result = new StringBuilder();
+        for (int i = 0; i < s.length(); i++) {
+            result.append(s.charAt(i));
+            if ((i + 1) % 8 == 0) {
+                result.append(" ");
+            }
+            if ((i + 1) % 48 == 0) {
+                result.append("\n");
+            }
+        }
+        return result.toString();
+    }
+
+    /**
+     * Generated 1024/160 DSA parameters.
      */
     private static final DSAParameters DSA_1024 = new DSAParameters(
-            new BigInteger("00e62ade78901baf65003aa0fbf18b601da0b53a6d25357e94a13fe6e5820ca343182" +
-                                   "b1539b038953bcaff1269f490bd1af40da5d0086be33361a11cae78d3465a" +
-                                   "c270a8c9505b31d45017d8ef9feb830c18e6f4090ec918c1e1de32ac85e39" +
-                                   "ac574d073bba30a0974987a8ce1ffc8aebe0095f5a4de6a52e8ecc3c99bf9" +
-                                   "bda02f", 16),
-            new BigInteger("00e26657957f452e9fd0d67992afc207f8f04aadfb", 16),
-            new BigInteger("33a6a71f1249e74a1ac3b1d682cf0b1b8208dfddffaabf9e1d8fac8f27bc8fa487d15" +
-                                   "cf3151db9c62d8c07464346b676a00abecdee7cefe8224f5260855ec50e48" +
-                                   "0cb369ccdb1243b32e5bd378e66b1f173d6909b7df6bbd3999815da954aa7" +
-                                   "0e1fbab7dc57281865ff3270d9356f61ff47a0d672cac69e6e7478113d044" +
-                                   "4928", 16));
-    /*
-     * Generated with `openssl dsaparam -text 2048`.
+            new BigInteger(("D808D06F 0308F8ED C9DE9A34 896ECB37 2349B6D4 09BB1EEB" +
+                            "603834DC 00ECFD72 E2D81800 6A8C02C4 194AA475 F3268E7F" +
+                            "EE2FA905 FAB996A7 98F71458 57528EBC 7F0D1558 BA10F3DA" +
+                            "8231DA65 B08AEA6E B74F9A52 62305F94 DAFE1B9F 423D53A1" +
+                            "1308B9FE 24679AE9 4612C4A3 33BF643D D2056071 9B5319CF" +
+                            "67D616CB AA94BB05")
+                                   .replaceAll("[\\s]+", ""), 16),
+            new BigInteger(("DB1590AE 2BE9C2DA B9B059BC 11781CFB 0E493F29")
+                                   .replaceAll("[\\s]+", ""), 16),
+            new BigInteger(("5ED4A48F 1D1508BD D73B820D C68583E3 CD57A1E8 A5D68872" +
+                            "708C59D4 9255DCED 5B3D3D0F 51C3584D 374784B7 C4C1C123" +
+                            "979AEBB1 E2A42F3C B99759CD 68C87511 30E46707 91C643DF" +
+                            "797086D3 0D144C27 595C5EAB 9AA4ED92 85137F10 82D8D28A" +
+                            "4C5B47D3 8CFDBF7A 4014EF13 F17BF32D FF134603 A914DE1B" +
+                            "3656C108 20EB83F9")
+                                   .replaceAll("[\\s]+", ""), 16));
+    /**
+     * Generated 2048/256 DSA2 parameters.
      */
     private static final DSAParameters DSA_2048 = new DSAParameters(
-            new BigInteger("00a6ecd8eb3031a0ed05f95addb307536710ee9bd405fef661581005dc63ab9049ae8" +
-                                   "6f90fc64ff57c16b0353482bcf4e597082ed22522149377fea0307f0d44ce" +
-                                   "8b8c226b3fb4ab87c60a1156606ffc6e2b020d0da55adcc67f190d5a766e1" +
-                                   "5c8cfb83d807f27de78f3fe75e2c8f67b984ea2b1ca5bcd5d241c14593b4b" +
-                                   "3743dab70906461e41635d91bd4e712635ba3f4af5ebeb0a5bb1d617a8f56" +
-                                   "36f3b3429834395fc6857a3e21e4f0f185d9f750a48dbac361be1c02d22c0" +
-                                   "65f945a184013e4addc7cde61ce84e9cd8141d962e70ccda0a5e893afe1a5" +
-                                   "42bfad9a127f2af4469fe66cc47ca8820e50c6fe08d15934ad306b66dd87e" +
-                                   "e971e8ada30bd3890b", 16),
-            new BigInteger("00efe3c0f9283d4f8e3c7327f7ae2cdf3409e497b4c01f31052f9a97df042c799d", 16),
-            new BigInteger("0092811cf2cedd84f9adf6f9955df6213ed8d5b2f3485286213f4af174f4888005521" +
-                                   "2336d0e8aee5460c850db7e2096341bf5560e26d41345142bff9278d7ef8d" +
-                                   "9ee2187843df9f1ea22a2b8fd6e8245f5764bd7dca1091224cde04c37300a" +
-                                   "da108faa5c09393bf9bdac9e4c5e67b7a7e92e279badd3ca0d861cbafb32e" +
-                                   "00b532df6fd9547c87262a51b8e3c9b698eda5f0c3e1e54f01ce7fef088e7" +
-                                   "f702a155f4f2cbf0df3d36500f0bb5442dd6fb56b2a7b0685fdd3d3aa8366" +
-                                   "ef0f41f2e7407556b7e412d7719310758735d4ab1fccfa6cffec3748f6816" +
-                                   "d785920da6493152a372d291eb844639c66e93f9342e5cedfdc9b4df0811a" +
-                                   "b6f44841da1acd50a3", 16)
+            new BigInteger(("9230ED82 5E8049A4 27DE7DC5 978B3C1D 8D67BC87 3AAABBBE" +
+                            "0C1BE83F 6083BCC5 CE23471C 8FF8575E 1D250198 FA247694" +
+                            "16C2B113 37734C50 9461E60A D704DE3C 57E6AE95 729C8368" +
+                            "A01531AE 1D8A6F73 4A827A89 AA027D58 3AA9141D 2E8E7FB2" +
+                            "036419C8 43573B90 00F321FB 2E7144E1 CA770A58 04802520" +
+                            "B6E7B886 735BFD16 58DD0C50 5886B88A EBB626BB 35D61C02" +
+                            "EC1DEE0C 64BF45C7 BC383B09 08BF16E9 C263F68C CF4BDD08" +
+                            "C3ED6033 36D79554 15FED93B A82A8B4B 3C186A99 1838DC64" +
+                            "3277A22F CA03F851 2998C8F4 E6E970EA 211F9AF1 67F7F761" +
+                            "E453D767 46AC0D57 830806D7 721FC596 8031CBD8 B5BAAA3B" +
+                            "0E568AAD A35F35AB BFD0DF54 8134E993")
+                                   .replaceAll("[\\s]+", ""), 16),
+            new BigInteger(("BBDF6554 B8FDD2DD 648D49DE DD16B29A 87114B33 D82ED64D" +
+                            "82F0AD4A 4DAF33ED").replaceAll("[\\s]+", ""), 16),
+            new BigInteger(("321F9448 60657BC8 ADBE119E 39557AF9 EDE8B09E 97B5C270" +
+                            "08E8048B E5165643 6355572B D44E383E 57EE993F 556FBF7A" +
+                            "B60AC042 97B116E6 38B0F930 A0BC1AEC E6142C77 470CE357" +
+                            "F3C8582D E9FC1ECE D21B3B97 73E020AE 1DEF5C40 F7972C31" +
+                            "48307D0D 982EB158 0F5FEFF1 DE427B16 E9EA132F 977CE9F7" +
+                            "A85A2DAB D586A639 119C5D2A CBFB1591 9E3828AD 283547BA" +
+                            "FF774BEF 02671CF0 9FFF3AC6 28ABAFF7 495426AB 6A7F84E8" +
+                            "CC98F154 44ECDDF4 BDC1DD52 EAA8E163 24128919 1CE5F991" +
+                            "BBB68E25 C0EDDFAC 93365C1F AB941AC1 215D25B0 CE939C7D" +
+                            "3BD71BAA CF274A45 2A733DD9 4D1DA8BA A7E1FE1B 5596D117" +
+                            "87D13227 CA5D7E8E 2A927271 0887C509")
+                                   .replaceAll("[\\s]+", ""), 16)
     );
 
-    /*
-     * Generated with `openssl dsaparam -text 3072`.
+    /**
+     * Generated 3072/256 DSA2 parameters.
      */
     private static final DSAParameters DSA_3072 = new DSAParameters(
-            new BigInteger("00bb2f37caf33498d51830218faad81039db9a345385e16dd79f005f1524c63062e9d" +
-                                   "7326c374438a507b3b433cb527e311c5ac952fcde0182c71fac828c1e15a3" +
-                                   "0d95eeeca4218b13b3f17d8400e8f6b61922ba066221af15e5fcdacc214be" +
-                                   "fc9eb5cff6a66c45ecd0c025f1cf04d2c5146679ce9902f109ad823ff1a54" +
-                                   "565f753cf39c62bf837c7b8bc1d5628a3b86c41d24edad363af0a07975c5c" +
-                                   "cc0a82346899994c8c94fa022fcd1936674d5531837b7889f2491d1d11362" +
-                                   "580f9c38ac8fe704f0ff7e0f8e8f929842d6815ffe91a8363d11ef0202847" +
-                                   "565b210d2a07e38ab25a0bb4dc3fd9f4befdf3030f5c86cb822ca7f8dffc4" +
-                                   "ffdbaa4e2727491361ba45e87c17e400554a8384b3331be128e003ec46706" +
-                                   "0da7a356b99aa570e32c9e4000d786bf42fb8e324780e2dad2e740557b160" +
-                                   "41297c63ee8cef5d96c0812fd7d2d0213237881c3f4c54290d4df7f86041a" +
-                                   "e089c379663b32aab968958858f492435bcea0ddbcc278cb4368a14262f9c" +
-                                   "7fdf8f05eb981f0dc79e6cd44022e5", 16),
-            new BigInteger("00d886cee189708271e4d460a2efc0815dbe2230671799cff049b4a9d6eebebe85", 16),
-            new BigInteger("00812b85a2738b5f13ef3826c36cdd04cdee408a34c42f88f103dc30aae7d33069150" +
-                                   "6d904bde69b387c272466eaf704e42f05b6d5aeb3e1e871e64cf19d9d866a" +
-                                   "1d03f7d9916c70abe77537cc50c1683324bd90f44abbbd053201fcd267425" +
-                                   "b8bdacd5ca88f4952db5cd2d262b93fc80793d8512d0e6116d957ee2c3af4" +
-                                   "84731b43e911e8c9a98b9d610d8b9a8297ef45a0a1f519478307d9133f026" +
-                                   "15719708061d6acaf27c7d88a0dac66c277ce649ef22fea740e44fe6f5c71" +
-                                   "91a9ea9c9265d0a95f0318c2bd81f234a8fc52e90e93e0e83d2d0f79dcad2" +
-                                   "f55fce41519467a4ad74f5676ddf658163ddf4b4ae886a3762e5b28c2b30f" +
-                                   "b8f78b902015d1cf08c8e134dc0dca5593345c9f66e7590f05aa755644795" +
-                                   "6bf346519ca33db85ac7a5a3d8928e4d953ae4cc22e7ec6944d898d7fe314" +
-                                   "b772aaff132e4b978ea972b6529aa0de58453c4d1debd24abed7e4bf14d65" +
-                                   "c6790cfa75b1eda98a0805200a381cc45b30635ca2fa34ef34cd5ca30d154" +
-                                   "3662293e0dcb67aa2f26992834150b", 16)
+            new BigInteger(("94B5F252 6145F1E6 44966718 D9440771 8B04064C 900C9F26" +
+                            "6EE923F1 5C56A95B A9CDE0E9 A47A8092 5450E929 4EABA441" +
+                            "6150E513 65730E35 50F7BBCD 2EAD09BB 33AD0295 1BA06E9E" +
+                            "38384959 C8120D9D 1853C54F 26B12F5A B449AEF8 A4C3ACB3" +
+                            "1D05EA3F 4429511B 224AD54A C7CBE62F 4F1E9BB8 AE93CA34" +
+                            "7E3FDC92 D3F7B2D4 5B84C22F 58972970 B186C3BA 6694356F" +
+                            "DC4707E6 1F3DBE7E 0F4DD46F 11488460 E6BC2033 9A88B23B" +
+                            "FD18F538 5A23CE6F D4D92ADC B74830B1 17660D14 566DB32E" +
+                            "C9E8D930 C428EB7C 915C34F7 78A98747 117CCF1C 14D91BBA" +
+                            "1BE03296 A18D488D CF6161B8 06BDAE43 04B8147A 861A0F5A" +
+                            "7017BBC3 297578BF DAB54917 25A233D3 2C8CB3C7 6B85D6A9" +
+                            "7F276B2C 1F1488DD 13FA9050 357DD722 6CDF352D AF36E2B0" +
+                            "ACE731F1 AE3D629C 82710374 F03DF3C6 43A4122C 2C89B5FA" +
+                            "76F32F1A B7A85515 C412B5A2 F4571512 293F4E5B 0AD710DC" +
+                            "CB5488BA 9BA22301 C6584C04 6E16E0CA 2B33CFD2 B123BA76" +
+                            "2026695E 493CF6BB 6B7997FB 6893ACCD 30652E66 53C5D0A9")
+                                   .replaceAll("[\\s]+", ""), 16),
+            new BigInteger(("8CE9107D 263AF57B 481CFA76 0E6D2AEF 776F5BC5 A719D7B5" +
+                            "751BB319 4905A36F")
+                                   .replaceAll("[\\s]+", ""), 16),
+            new BigInteger(("2CF61C09 A9E3E762 C314D0D9 384E8F00 3932306B BCC2D286" +
+                            "5A179A10 80F566C3 B9F53E8A CBB092FC CBDAECCC 0DAFAF5B" +
+                            "DF29A825 6FD12190 922FF96F 7B2CC830 BAA6A2C7 08CE6DD0" +
+                            "CDD8BE58 55E96B9A 250BD91A 6896B037 36CF3F76 BA2278EF" +
+                            "B85E93AA 3F9A6551 5D6EDA94 24C0FD24 3B1F9758 34C92CDC" +
+                            "09ECC1BF 816E5045 874BE7F0 4813AD4A 386A1E71 2A1D7DD0" +
+                            "8826B2E7 4F3CEFB4 83CD4A35 A4E074A8 E5188322 7E432B39" +
+                            "7DFFDBF1 5A56FCA3 8D7A444F 7A5AD652 8EFDD9A8 B8547538" +
+                            "CACAC3FB 91D0B1EF 4A93561A 97BBB379 750562F5 56703169" +
+                            "422F116D E3AA3C1B EEE803FD 5DBFAB86 BE5EED7E 0EC049F8" +
+                            "2EEAD0BA 3A074B04 3B57F9B7 E547AC84 C48CF250 895516EB" +
+                            "DF91C478 04BAB943 F3CEE677 F5CEE3C5 180C5E52 571D9899" +
+                            "3475EE79 7655055F 1BA376AD 18ADDDE4 97636BA0 8C6483D4" +
+                            "5C244333 81305A62 4DBFA4E6 8125FB3D 6C916F33 062B0194" +
+                            "64E32B8A 70F5C9E8 3C460270 5D4BE26C 83C28DFF 5D18456E" +
+                            "3F5D2FF6 99AA3F26 BD236515 3E67CFC6 E2AC1578 3F2A5B65")
+                                   .replaceAll("[\\s]+", ""), 16)
     );
 
     /**
